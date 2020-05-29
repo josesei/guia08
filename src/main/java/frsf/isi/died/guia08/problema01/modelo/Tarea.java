@@ -12,9 +12,26 @@ public class Tarea {
 	private LocalDateTime fechaFin;
 	private Boolean facturada;
 	
-	public void asignarEmpleado(Empleado e) {
+	
+	
+	public void asignarEmpleado(Empleado e) throws TareaNoAsignableException {
 		// si la tarea ya tiene un empleado asignado
 		// y tiene fecha de finalizado debe lanzar una excepcion
+		boolean empAsignado = this.empleadoAsignado!=null, tareaFinalizada = this.fechaFin!=null;
+		String errEmpAsignado ="", errTareaFinalizada="";
+		if(empAsignado) {
+			errEmpAsignado += "La tarea ya posee un empleado asignado. ";
+		}
+		if(tareaFinalizada) {
+			errTareaFinalizada+="La tarea ya ha sido finalizada. ";
+		}
+		String error = errEmpAsignado + errTareaFinalizada;
+		if(error!="") {
+			throw new TareaNoAsignableException(error + "La tarea ya posee un empleado asignado." );
+		}			
+		else {
+			this.empleadoAsignado=e;
+		}
 	}
 
 	public Integer getId() {
