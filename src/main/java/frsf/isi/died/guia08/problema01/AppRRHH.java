@@ -21,7 +21,6 @@ import frsf.isi.died.guia08.problema01.modelo.Empleado.Tipo;
 import frsf.isi.died.guia08.problema01.modelo.Tarea;
 import frsf.isi.died.guia08.problema01.modelo.TareaNoAsignableException;
 import frsf.isi.died.guia08.problema01.modelo.TareaNoExisteException;
-import frsf.isi.died.guia08.problema01.modelo.TareaPreviamenteComenzadaFinalizadaException;
 
 public class AppRRHH {
 
@@ -47,7 +46,7 @@ public class AppRRHH {
 						else if(horasReales>duracionEstimada+8) {
 							costoParticularHora*=0.75;
 						}
-						return costoParticularHora*horasReales;
+						return costoParticularHora*duracionEstimada;
 				};
 		Predicate<Tarea> puedeAsignarTarea = (t) -> {
 			return emp.getTareasAsignadas().stream()
@@ -72,7 +71,7 @@ public class AppRRHH {
 						if(horasReales < duracionEstimada) {
 							costoParticularHora*=1.20;
 						}
-						return costoParticularHora*horasReales;
+						return costoParticularHora*duracionEstimada;
 				};
 		Predicate<Tarea> puedeAsignarTarea = (t) -> {
 			return emp.getTareasAsignadas().stream()
@@ -96,11 +95,11 @@ public class AppRRHH {
 			tarea.setId(idTarea);
 			tarea.setDescripcion(descripcion);
 			tarea.setDuracionEstimada(duracionEstimada);
+			tarea.setFacturada(Boolean.FALSE);
 			try {
-				if(emp.get().asignarTarea(tarea).booleanValue()) {
-					tarea.asignarEmpleado(emp.get());
+				emp.get().asignarTarea(tarea);
 				}
-			}catch(TareaNoAsignableException e) {
+			catch(TareaNoAsignableException e) {
 				System.err.println(e.getMessage());
 			}
 		}
@@ -118,9 +117,6 @@ public class AppRRHH {
 			}catch(TareaNoExisteException e1) {
 				System.err.println(e1.getMessage());
 			}
-			catch(TareaPreviamenteComenzadaFinalizadaException e2) {
-				System.err.println(e2.getMessage());
-			}
 		}
 	}
 	
@@ -134,8 +130,6 @@ public class AppRRHH {
 				emp.get().finalizar(idTarea);
 			}catch(TareaNoExisteException e1) {
 				System.err.println(e1.getMessage());
-			}catch(TareaPreviamenteComenzadaFinalizadaException e2) {
-				System.err.println(e2.getMessage());
 			}
 		}
 	}

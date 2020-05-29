@@ -50,8 +50,11 @@ public class Empleado {
 		// calcular el costo
 		// marcarlas como facturadas.
 		return this.tareasAsignadas.stream()
-			.filter(t->t.getFacturada().booleanValue()==false && t.getFechaFin().compareTo(LocalDateTime.now())>0)
-			.mapToDouble(t->calculoPagoPorTarea.apply(t))
+			.filter(t->t.getFacturada().booleanValue()==false && t.getFechaFin()!=null)
+			.mapToDouble(t->{
+				t.setFacturada(Boolean.TRUE);
+				return calculoPagoPorTarea.apply(t);
+				})
 			.sum();
 	}
 	
@@ -76,93 +79,72 @@ public class Empleado {
 	public Boolean asignarTarea(Tarea t) throws TareaNoAsignableException{
 		if(this.puedeAsignarTarea.test(t)) {
 			this.tareasAsignadas.add(t);
-			return true;
+			t.asignarEmpleado(this);
+			return Boolean.TRUE;
 		}
-		return false;
+		else throw new TareaNoAsignableException("La tarea no pudo asignarse, el empleado no cumple los requisitos");
 	}
 	
-	public void comenzar(Integer idTarea) throws TareaNoExisteException, TareaPreviamenteComenzadaFinalizadaException {
+	public void comenzar(Integer idTarea) throws TareaNoExisteException {
 		// busca la tarea en la lista de tareas asignadas 
 		// si la tarea no existe lanza una excepción
-		Optional<Tarea> tarea;
-		try {
-		 tarea = this.tareasAsignadas.stream()
+		Optional<Tarea> tarea = this.tareasAsignadas.stream()
 			.filter(t->t.getId().intValue()==idTarea.intValue())
 			.findFirst();
-		}catch(NullPointerException npe) {
-			throw new TareaNoExisteException("La Tarea no existe en la lista de Tareas del empleado");
-		}
 		if(tarea.isPresent()) {
-			if(tarea.get().getFechaFin()==null) {
-				tarea.get().setFechaInicio(LocalDateTime.now());
-			}
-			else {
-				throw new TareaPreviamenteComenzadaFinalizadaException("No puede finalizarse la tarea. La tarea ya había sido comenzada anteriormente.");
-			}
+			tarea.get().setFechaInicio(LocalDateTime.now());
+		}
+		else {
+			throw new TareaNoExisteException("El id de tarea no se corresponde a una tarea asignada al empleado");
 		}
 	}
 	
-	public void finalizar(Integer idTarea) throws TareaNoExisteException, TareaPreviamenteComenzadaFinalizadaException {
+	public void finalizar(Integer idTarea) throws TareaNoExisteException {
 		// busca la tarea en la lista de tareas asignadas 
 		// si la tarea no existe lanza una excepción
 		// si la tarea existe indica como fecha de finalizacion la fecha y hora actual
-		Optional<Tarea> tarea;
-		try {
-		 tarea = this.tareasAsignadas.stream()
+		Optional<Tarea>  tarea = this.tareasAsignadas.stream()
 			.filter(t->t.getId().intValue()==idTarea.intValue())
 			.findFirst();
-		}catch(NullPointerException npe) {
-			throw new TareaNoExisteException("La Tarea no existe en la lista de Tareas del empleado");
-		}
 		if(tarea.isPresent()) {
-			if(tarea.get().getFechaFin()==null) {
-				tarea.get().setFechaFin(LocalDateTime.now());
-			}
-			else {
-				throw new TareaPreviamenteComenzadaFinalizadaException("No puede finalizarse la tarea. La tarea ya había sido finalizada anteriormente.");
-			}
-			
+			tarea.get().setFechaFin(LocalDateTime.now());
+		}
+		else {
+			throw new TareaNoExisteException("El id de tarea no se corresponde a una tarea asignada al empleado");
 		}
 	}
 
-	public void comenzar(Integer idTarea,String fecha) throws TareaNoExisteException, TareaPreviamenteComenzadaFinalizadaException  {
+	public void comenzar(Integer idTarea,String fecha) throws TareaNoExisteException {
 		// busca la tarea en la lista de tareas asignadas 
 		// si la tarea no existe lanza una excepción
 		// si la tarea existe indica como fecha de finalizacion la fecha y hora actual
 		Optional<Tarea> tarea;
-		try {
 			 tarea = this.tareasAsignadas.stream()
 				.filter(t->t.getId().intValue()==idTarea.intValue())
 				.findFirst();
-		}catch(NullPointerException npe) {
-			throw new TareaNoExisteException("La Tarea no existe en la lista de Tareas del empleado");
-		}
 		if(tarea.isPresent()) {
-			if(tarea.get().getFechaInicio()==null) {
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("DD-MM-YYYY HH:mm");
-				tarea.get().setFechaInicio(LocalDateTime.parse(fecha, formatter));
-			}else {
-				throw new TareaPreviamenteComenzadaFinalizadaException("No puede comenzarse la tarea. La tarea ya había sido comenzada anteriormente.");
-			}
-			
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+				tarea.get().setFechaInicio(LocalDateTime.parse(fecha, formatter));	
+		}
+		else {
+			throw new TareaNoExisteException("El id de tarea no se corresponde a una tarea asignada al empleado");
 		}
 	}
 	
-	public void finalizar(Integer idTarea,String fecha) throws TareaNoExisteException, TareaPreviamenteComenzadaFinalizadaException {
+	public void finalizar(Integer idTarea,String fecha) throws TareaNoExisteException {
 		// busca la tarea en la lista de tareas asignadas 
 		// si la tarea no existe lanza una excepción
 		// si la tarea existe indica como fecha de finalizacion la fecha y hora actual
 		Optional<Tarea> tarea;
-		try {
 		 tarea = this.tareasAsignadas.stream()
 			.filter(t->t.getId().intValue()==idTarea.intValue())
 			.findFirst();
-		}catch(NullPointerException npe) {
-			throw new TareaNoExisteException("La Tarea no existe en la lista de Tareas del empleado");
-		}
 		if(tarea.isPresent()) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("DD-MM-YYYY HH:mm");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 			tarea.get().setFechaFin(LocalDateTime.parse(fecha, formatter));
+		}
+		else {
+			throw new TareaNoExisteException("El id de tarea no se corresponde a una tarea asignada al empleado");
 		}
 	}
 	

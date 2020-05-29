@@ -18,16 +18,17 @@ public class Tarea {
 		// si la tarea ya tiene un empleado asignado
 		// y tiene fecha de finalizado debe lanzar una excepcion
 		boolean empAsignado = this.empleadoAsignado!=null, tareaFinalizada = this.fechaFin!=null;
-		String errEmpAsignado ="", errTareaFinalizada="";
+		String errEmpAsignado ="";
+		String errTareaFinalizada="";
 		if(empAsignado) {
 			errEmpAsignado += "La tarea ya posee un empleado asignado. ";
 		}
 		if(tareaFinalizada) {
 			errTareaFinalizada+="La tarea ya ha sido finalizada. ";
 		}
-		String error = errEmpAsignado + errTareaFinalizada;
+		String error = errEmpAsignado.concat(errTareaFinalizada);
 		if(error!="") {
-			throw new TareaNoAsignableException(error + "La tarea ya posee un empleado asignado." );
+			throw new TareaNoAsignableException(error);
 		}			
 		else {
 			this.empleadoAsignado=e;
