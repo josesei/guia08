@@ -2,7 +2,6 @@ package frsf.isi.died.guia08.problema01;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -212,7 +211,7 @@ public class AppRRHH {
 					.filter(t->t.getFechaFin()!=null && t.getFacturada().booleanValue()==false)
 					.collect(Collectors.toList());
 				
-				if(tareasTerminadas.size()>0) {
+				if(tareasTerminadas != null && tareasTerminadas.size()>0) {
 				
 					for(Tarea tarea : tareasTerminadas) {
 						
